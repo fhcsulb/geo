@@ -1,4 +1,26 @@
-var place = {};
+function place (Country, Province, State, City, Zipcode, County, Elevation) {
+    this.country = Country;
+    this.province = Province;
+    this.state = State;
+    this.city = City;
+    this.zipcode = Zipcode;
+    this.county = County;
+    this.elevation = Elevation;
+    this.printCountry = function() { return this.country;};
+    this.printProvince = function() { return this.province;};
+    this.printState = function() { return this.state;};
+    this.printCity = function() {return this.city;};
+    this.printCounty = function() { return this.county;};
+    this.elevation = function() { return this.elevation;};
+    /*
+    this.printHierarchy = function() {return this.printCity()+' '+this.printState()+' '+
+                                this.printCountry();};
+    */
+    this.printHierarchy = function() {
+        return (this.printCity() + ' ' + (this.state === undefined ? this.printProvince() : this.printState() ) + ' '
+                    +this.printCountry() );};
+    
+}
 
 function Request(url) {
     var responseText_loc;
@@ -8,12 +30,22 @@ function Request(url) {
     console.log(url);
     xhttp.setRequestHeader("Content-type","application/json");
 
-    xhttp.onreadystatechange = function () {
+    xhttp.onreadystatechange = function() {
         if(xhttp.readyState == 4 && xhttp.status == 200) {
             // alert(xhttp.responseText);
             responseText_loc = xhttp.responseText;
-            console.log("1. "+responseText_loc);
-            extractData(responseText_loc);
+            // console.log("1. "+responseText_loc);
+
+            var LocationData = JSON.parse(responseText_loc);
+            console.log(LocationData);
+            if(LocationData.length >= 1) {
+                console.log("multi");
+                multiResponse(LocationData);
+            } else {
+                console.log("single")
+                singleResponse(LocationData);
+            }
+            
         }
     }
 
@@ -22,53 +54,39 @@ function Request(url) {
 
 }
 
-function cityName() {
-    return place.city;
+
+function singleResponse(data) {
+
+    var somePlace = new place(data.country, data.state, data.province, data.city);
+    console.log(somePlace.printCity());
+    console.log(somePlace.printState());
+    console.log(somePlace.printProvince());
+    console.log(somePlace.printCountry());
+    
+    return somePlace;
+
+    
 }
 
-function provinceName() {
-    return place.province;
+function multiResponse(data) {
+    var Areas = [];
+   
+   for(i = 0; i < data.length; i++) {
+       Areas.push( new place (data[i].country, data[i].province, data[i].state,
+    data[i].city));
+   }
+
+   for (k = 0; k < Areas.length; k++) {
+       console.log("Country: "+Areas[k].printCountry());
+       console.log("Province: "+Areas[k].printProvince());
+       console.log("State: "+Areas[k].printState());
+       console.log("City: "+Areas[k].printCity());
+       console.log("Hierarchy: "+Areas[k].printHierarchy())
+   }
+   
+
 }
 
-function stateName() {
-    return place.state;
-}
-
-function countryName() {
-    return place.country;
-}
-
-function hierarchy() {
-    return countryName() + stateName() + cityName();
-}
 
 
-function extractData(data) {
-    console.log(data);
-    
-    var LocationData = JSON.parse(data);
-    
-    
-     
-    
-        console.log(LocationData[0]);
-
-        var area_instance = LocationData[0];
-        place.country = area_instance.country;
-        console.log(place.country);
-    
-        if(area_instance.hasOwnProperty('state')) {
-    
-            place.state = area_instance.state;
-            console.log(place.state);
-        }
-        else {
-            place.province = area_instance.province;
-            console.log(place.province);
-        }
-    
-        place.city = area_instance.city;
-        console.log(place.city);
-    
-}
 

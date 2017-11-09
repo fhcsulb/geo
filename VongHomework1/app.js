@@ -62,6 +62,7 @@ function singleResponse(data) {
     console.log(somePlace.printState());
     console.log(somePlace.printProvince());
     console.log(somePlace.printCountry());
+    console.log(somePlace.printHierarchy());
     
     return somePlace;
 

@@ -1,4 +1,11 @@
-function place (Country, Province, State, City, Zipcode, County, Elevation) {
+/*
+    Felix Huang #013427386
+    11/9/2017
+*/
+
+// This is a function for creating a 'place' object.
+// The object contains name:value pairs that describe the 'place' object
+function place (Country, Province, State, City, Zipcode, County, Elevation,Timezone) {
     this.country = Country;
     this.province = Province;
     this.state = State;
@@ -6,85 +13,102 @@ function place (Country, Province, State, City, Zipcode, County, Elevation) {
     this.zipcode = Zipcode;
     this.county = County;
     this.elevation = Elevation;
-    this.printCountry = function() { return this.country;};
-    this.printProvince = function() { return this.province;};
-    this.printState = function() { return this.state;};
-    this.printCity = function() {return this.city;};
-    this.printCounty = function() { return this.county;};
-    this.elevation = function() { return this.elevation;};
-    /*
-    this.printHierarchy = function() {return this.printCity()+' '+this.printState()+' '+
-                                this.printCountry();};
-    */
+    this.timezone = Timezone;
+    
+    // Methods for accessing 'place' object data 
+    this.printCountry = function() { 
+        return this.country;
+    };
+
+    this.printProvince = function() { 
+        return this.province;
+    };
+
+    this.printState = function() { 
+        return this.state;
+    };
+
+    this.printCity = function() {
+        return this.city;
+    };
+    this.printCounty = function() { 
+        return this.county;
+    };
+
+    this.elevation = function() { 
+        return this.elevation;
+    };
+
     this.printHierarchy = function() {
-        return (this.printCity() + ' ' + (this.state === undefined ? this.printProvince() : this.printState() ) + ' '
-                    +this.printCountry() );};
+        return (this.printCity() + ' ' + (this.state === undefined ? this.printProvince() : this.printState() ) 
+        + ' ' +this.printCountry() );
+    };
+
+    this.printElevation  = function() {
+        return this.timezone;
+    }
     
 }
 
-function Request(url) {
-    var responseText_loc;
+// This is a function to request information about a place.
+// This function works if the data is stored in JSON format
+// The function can handle a single JSON object or multiple
+// JSON objects encased in [ ] 
+function requestInfo() {
+    // The variable will store the response from the GET
+    var responseLocation;
 
+    // Create the request to access data source
     var xhttp = new XMLHttpRequest();
-    xhttp.open("GET",url,true);
-    console.log(url);
+    xhttp.open("GET","data.json",true);
     xhttp.setRequestHeader("Content-type","application/json");
 
+    // This function fires whenever xhttp.readyState changes.
+    // Whenever the state has changed and the response to GET was
+    // successful, extract data from the response. 
     xhttp.onreadystatechange = function() {
         if(xhttp.readyState == 4 && xhttp.status == 200) {
-            // alert(xhttp.responseText);
-            responseText_loc = xhttp.responseText;
-            // console.log("1. "+responseText_loc);
 
-            var LocationData = JSON.parse(responseText_loc);
-            console.log(LocationData);
-            if(LocationData.length >= 1) {
-                console.log("multi");
-                multiResponse(LocationData);
+            // The request response will return data from the data source
+            // which will be parsed
+            responseLocation = xhttp.responseText;
+            var locationJSON = JSON.parse(responseLocation);
+            
+            // This condition will call the appropriate function if response received
+            // had multiple JSON objects or only a single one. 
+            if(locationJSON.length >= 1) {
+                addSingle(locationJSON);
             } else {
-                console.log("single")
-                singleResponse(LocationData);
+                addMultiple(locationJSON);
             }
             
         }
     }
 
     xhttp.send();
-    // console.log("2. "+responseText_loc);
-
 }
 
+// This function is for adding a single 'place' object.
+function addSingle(data) {
 
-function singleResponse(data) {
-
-    var somePlace = new place(data.country, data.state, data.province, data.city);
-    console.log(somePlace.printCity());
-    console.log(somePlace.printState());
-    console.log(somePlace.printProvince());
-    console.log(somePlace.printCountry());
-    console.log(somePlace.printHierarchy());
-    
+    var somePlace = new place(data.country, data.state, data.province, data.city);  
     return somePlace;
-
-    
 }
 
-function multiResponse(data) {
-    var Areas = [];
+// This function is for adding multiple 'place' objects
+function addMultiple(data) {
+    // Create an array to store 'place' objects
+    var areas = [];
    
+    // Add 'place' objects to the array 
    for(i = 0; i < data.length; i++) {
-       Areas.push( new place (data[i].country, data[i].province, data[i].state,
-    data[i].city));
+       areas.push( new place (data[i].country, 
+                            data[i].province, 
+                            data[i].state,
+                             data[i].city));
    }
 
-   for (k = 0; k < Areas.length; k++) {
-       console.log("Country: "+Areas[k].printCountry());
-       console.log("Province: "+Areas[k].printProvince());
-       console.log("State: "+Areas[k].printState());
-       console.log("City: "+Areas[k].printCity());
-       console.log("Hierarchy: "+Areas[k].printHierarchy())
-   }
-   
+   return areas;
 
 }
 
